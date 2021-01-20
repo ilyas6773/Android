@@ -71,6 +71,54 @@ class ChoresDatabaseHandler(context: Context) :
         return chore
     }
 
+    fun readChores(): ArrayList<Chore>{
+        var db: SQLiteDatabase = readableDatabase
+        var list: ArrayList<Chore> = ArrayList()
+
+        var selsectAll = "SELECT * FROM " + TABLE_NAME
+
+        var cursor: Cursor = db.rawQuery(selectAll, null)
+
+        if(cursor.moveToFirst()){
+            do{
+                var chore = Chore()
+
+                chore.choreName = cursor.getString(cursor.getColumnIndex(KEY_CHORE_NAME))
+                chore.assignedTo= cursor.getString(cursor.getColumnIndex(KEY_CHORE_ASSIGNED_TO))
+                chore.timeAssigned = cursor.getLong(cursor.getColumnIndex(KEY_CHORE_ASSIGNED_TIME))
+                chore.assignedBy = cursor.getString(cursor.getColumnIndex(KEY_CHORE_ASSIGNED_BY))
+
+                list.add(chore)
+            }while (cursor.moveToNext())
+        }
+        return list
+    }
+
+    fun updateChore(chore: Chore){
+        var db: SQLiteDatabase =writableDatabase
+
+        var values: ContentValues = ContentValues()
+        values.put(KEY_CHORE_NAME,chore.choreName)
+        values.put(KEY_CHORE_ASSIGNED_BY,chore.assignedBy)
+        values.put(KEY_CHORE_ASSIGNED_TO,chore.assignedTo)
+        values.put(KEY_CHORE_ASSIGNED_TIME,System.currentTimeMillis())
+
+        return db.update(TABLE_NAME, values, KEY_ID + "=?", arrayOf(chore.id.toString()))
+    }
+
+    fun deleteChore(chore: Chore){
+        var db: SQLiteDatabase = writableDatabase
+        db.delete(TABLE_NAME, KEY_ID +"=?", arrayOf(chore.id.toString()))
+        db.close()
+    }
+
+    fun getChoresCount(): Int{
+        var db:SQLiteDatabase = readableDatabase
+        var countQuery = "SELECT * FROM "+ TABLE_NAME
+        var cursor: Cursor = db.rawQuery(countQuery, null)
+        return cursor.count
+    }
+
 
 
 }
